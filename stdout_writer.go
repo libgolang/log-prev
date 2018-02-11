@@ -33,7 +33,7 @@ type writerChannelMsg struct {
 	args   []interface{}
 }
 
-// WriteLog implementation of Writer interace
+// WriteLog implementation of Writer interface
 func (wc *WriterChannel) WriteLog(name string, mLevel Level, format string, args []interface{}) {
 	wc.chn <- &writerChannelMsg{name, mLevel, format, args}
 }
