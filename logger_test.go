@@ -6,29 +6,29 @@ import (
 
 func TestLoggerLevels(t *testing.T) {
 
-	checkLoggerTest("DEBUG", "test-logger1", "test-msg1", ERROR, t, true)
-	checkLoggerTest("DEBUG", "test-logger1", "test-msg1", WARN, t, true)
-	checkLoggerTest("DEBUG", "test-logger1", "test-msg1", INFO, t, true)
-	checkLoggerTest("DEBUG", "test-logger1", "test-msg1", DEBUG, t, true)
+	checkLoggerTest(DEBUG, "test-logger1", "test-msg1", ERROR, t, true)
+	checkLoggerTest(DEBUG, "test-logger1", "test-msg1", WARN, t, true)
+	checkLoggerTest(DEBUG, "test-logger1", "test-msg1", INFO, t, true)
+	checkLoggerTest(DEBUG, "test-logger1", "test-msg1", DEBUG, t, true)
 
-	checkLoggerTest("INFO", "test-logger2", "test-msg2", ERROR, t, true)
-	checkLoggerTest("INFO", "test-logger2", "test-msg2", WARN, t, true)
-	checkLoggerTest("INFO", "test-logger2", "test-msg2", INFO, t, true)
-	checkLoggerTest("INFO", "test-logger2", "test-msg2", DEBUG, t, false)
+	checkLoggerTest(INFO, "test-logger2", "test-msg2", ERROR, t, true)
+	checkLoggerTest(INFO, "test-logger2", "test-msg2", WARN, t, true)
+	checkLoggerTest(INFO, "test-logger2", "test-msg2", INFO, t, true)
+	checkLoggerTest(INFO, "test-logger2", "test-msg2", DEBUG, t, false)
 
-	checkLoggerTest("WARN", "test-logger3", "test-msg3", ERROR, t, true)
-	checkLoggerTest("WARN", "test-logger3", "test-msg3", WARN, t, true)
-	checkLoggerTest("WARN", "test-logger3", "test-msg3", INFO, t, false)
-	checkLoggerTest("WARN", "test-logger3", "test-msg3", DEBUG, t, false)
+	checkLoggerTest(WARN, "test-logger3", "test-msg3", ERROR, t, true)
+	checkLoggerTest(WARN, "test-logger3", "test-msg3", WARN, t, true)
+	checkLoggerTest(WARN, "test-logger3", "test-msg3", INFO, t, false)
+	checkLoggerTest(WARN, "test-logger3", "test-msg3", DEBUG, t, false)
 
-	checkLoggerTest("ERROR", "test-logger4", "test-msg4", ERROR, t, true)
-	checkLoggerTest("ERROR", "test-logger4", "test-msg4", WARN, t, false)
-	checkLoggerTest("ERROR", "test-logger4", "test-msg4", INFO, t, false)
-	checkLoggerTest("ERROR", "test-logger4", "test-msg4", DEBUG, t, false)
+	checkLoggerTest(ERROR, "test-logger4", "test-msg4", ERROR, t, true)
+	checkLoggerTest(ERROR, "test-logger4", "test-msg4", WARN, t, false)
+	checkLoggerTest(ERROR, "test-logger4", "test-msg4", INFO, t, false)
+	checkLoggerTest(ERROR, "test-logger4", "test-msg4", DEBUG, t, false)
 }
 
 func checkLoggerTest(
-	loggerLevel,
+	loggerLevel Level,
 	givenLoggerName,
 	givenLoggerMsg string,
 	givenLoggerLevel Level,
@@ -75,10 +75,10 @@ func checkLoggerTest(
 	}
 }
 
-func getTestLogger(tw *testWriter, name, level string) *Logger {
-	cfg := &Config{}
+func getTestLogger(tw *testWriter, name string, level Level) *Logger {
+	cfg := Config{}
 	cfg.DefaultLevel = level
-	cfg.Levels = make(map[string]string)
+	cfg.Levels = make(map[string]Level)
 	Configuration(cfg)
 	log := NewLogger(name)
 	log.writer = tw
