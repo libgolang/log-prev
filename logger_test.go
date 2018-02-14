@@ -1,4 +1,4 @@
-package logger
+package log
 
 import (
 	"testing"
@@ -75,13 +75,10 @@ func checkLoggerTest(
 	}
 }
 
-func getTestLogger(tw *testWriter, name string, level Level) *Logger {
-	cfg := Config{}
-	cfg.DefaultLevel = level
-	cfg.Levels = make(map[string]Level)
-	Configuration(cfg)
-	log := NewLogger(name)
-	log.writer = tw
+func getTestLogger(tw *testWriter, name string, level Level) Logger {
+	log := New(name)
+	log.SetLevel(level)
+	globalWriters = []Writer{tw}
 	return log
 }
 

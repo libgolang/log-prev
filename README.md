@@ -5,7 +5,26 @@
 
 ## Download
 
-    go get -u github.com/rhamerica/go-logger
+    go get -u github.com/rhamerica/go-log
+
+
+## Simple Usage
+
+    package main
+    
+    import (
+    	"github.com/rhamerica/go-log"
+    )
+    
+    func main() {
+
+	log.SetDefaultLevel(log.WARN)
+
+    	log.Debug("This is a debugging statement ... won't show")
+    	log.Info("This is a debugging statement  ... won't show")
+    	log.Warn("This is a debugging statement  ... will show")
+    	log.Error("This is a debugging statement ... will show")
+    }
 
 
 ## Configuration
@@ -14,18 +33,15 @@
     package main
     
     import (
-    	"github.com/rhamerica/go-logger"
+    	"github.com/rhamerica/go-log"
     )
     
     func main() {
     
-    	log1 := logger.NewLogger("myLogger")
-    	log2 := logger.NewLogger("OtherLogger")
+    	log1 := log.New("myLogger")
+    	log2 := log.New("OtherLogger")
     
-    	logger.Configuration(logger.Config{
-    		DefaultLevel: logger.WARN,
-    		Levels:       map[string]logger.Level{"myLogger": logger.DEBUG},
-    	})
+    	log.SetLoggerLevels(map[string]Level{"myLogger": log.DEBUG})
     
     	log1.Warn("This is a warning statement ... will show")
     	log1.Debug("This is a debugging statement ... will show")
@@ -39,33 +55,19 @@
 ## Example
 
     import(
-        "github.com/rhamerica/go-logger"
+        "github.com/rhamerica/go-log"
     ) 
      
     func main() {
-        log := logger.NewLogger("main")
+        l := log.New("main")
 
-        log.Debug("Debug Message")
-        log.Info("Info Message")
-        log.Warn("Warn Message")
-        log.Error("Error Message" )
-        log.Panic("Panic Message") // calls panic()
+        l.Debug("Debug Message")
+        l.Info("Info Message")
+        l.Warn("Warn Message")
+        l.Error("Error Message" )
+        l.Panic("Panic Message") // calls panic()
     }
 
-### Structs
-
-
-    import(
-        "github.com/rhamerica/go-logger"
-    ) 
-     
-    type MyStruct struct {
-        log logger.Logger
-    }
-     
-    func (ms *MyStruct) Foo(name string) {
-        ms.log.Info("Hello %s", name) // same signature as fmt.Printf()
-    }
 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/rhamerica/go-logger)](https://goreportcard.com/report/github.com/rhamerica/go-logger)

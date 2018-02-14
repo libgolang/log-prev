@@ -5,11 +5,12 @@ import (
 )
 
 func main() {
+	log.DefaultLevel(WARN)
 
-	log1 := logger.NewLogger("myLogger")
-	log2 := logger.NewLogger("OtherLogger")
+	log1 := log.NewLogger("myLogger")
+	log2 := log.NewLogger("OtherLogger")
 
-	logger.Configuration(logger.Config{
+	log.Configuration(logger.Config{
 		DefaultLevel: logger.WARN,
 		Levels:       map[string]logger.Level{"myLogger": logger.DEBUG},
 	})

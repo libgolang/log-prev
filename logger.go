@@ -1,107 +1,166 @@
-package logger
+package log
 
-// Config logger configuration
-type Config struct {
-	// DefaultLevel default logging level
-	DefaultLevel Level `json:"default"`
-	// Levels map of logger names to Levels
-	Levels map[string]Level `json:"levels"`
+import (
+	"os"
+)
+
+var (
+	globalLevels  = map[string]Level{"": getDefaultLevel(WARN)}
+	globalLoggers = map[string]Logger{}
+	globalWriters = []Writer{getDefaultWriter()}
+	globalLogger  = New("")
+)
+
+// Logger interface exposed to users
+type Logger interface {
+	Error(format string, args ...interface{})
+	Warn(format string, args ...interface{})
+	Info(format string, args ...interface{})
+	Debug(format string, args ...interface{})
+	Panic(format string, args ...interface{})
+	SetLevel(Level)
 }
 
 // Writer writer interface
 type Writer interface {
-	WriteLog(name string, mlvl Level, format string, args []interface{})
+	WriteLog(name string, logLevel Level, format string, args []interface{})
 }
 
-// Logger Logging Object
-type Logger struct {
-	name   string
-	level  Level
-	writer Writer
+// logger instance
+type logger struct {
+	level Level
+	name  string
 }
 
-//
-// global configuraction
-type configStruct struct {
-	defaultLevel Level
-	loggerMap    map[string]*Logger
-	writer       Writer
-}
-
-var config = configStruct{
-	defaultLevel: WARN,
-	loggerMap:    make(map[string]*Logger),
-	writer:       &WriterStdout{},
-}
-
-// NewLogger instantiates logger
-func NewLogger(name string) *Logger {
-	var log *Logger
-	log, ok := config.loggerMap[name]
-	if ok {
-		return log
+// New constructor
+func New(name string) Logger {
+	// level
+	var lvl Level
+	if l, ok := globalLevels[name]; ok {
+		lvl = l
+	} else {
+		lvl = globalLevels[""]
 	}
 
-	log = &Logger{name: name, level: config.defaultLevel}
-	config.loggerMap[name] = log
-
-	// set writer
-	// use a WriterChannel wrapping an StdoutWriter
-	log.writer = &WriterStdout{}
-
-	return log
+	l := &logger{lvl, name}
+	globalLoggers[name] = l
+	return l
 }
 
-// Configuration sets the global config
-// for all existing loggers and new loggers
-func Configuration(conf Config) {
-	config.defaultLevel = conf.DefaultLevel
+// SetDefaultLevel sets the default logging level. It defaults to WARN
+func SetDefaultLevel(l Level) {
+	globalLevels[""] = l
+}
 
-	// reset existing logger levels
-	for _, log := range config.loggerMap {
-		log.level = config.defaultLevel
-	}
-
-	// Create instances defined in configuration
-	for k, v := range conf.Levels {
-		log, ok := config.loggerMap[k]
-		if !ok {
-			log = NewLogger(k)
+// SetLoggerLevels sets the levels for all existing loggers and future loggers
+func SetLoggerLevels(levels map[string]Level) {
+	//
+	for k, lev := range levels {
+		if log, ok := globalLoggers[k]; ok {
+			log.SetLevel(lev)
 		}
-		log.level = v
 	}
+
+	// make sure there is always a root logger level
+	if lvl, ok := levels[""]; !ok {
+		levels[""] = lvl
+	}
+
+	//
+	globalLevels = levels
+}
+
+// SetWriters sets the writers for all the loggers
+func SetWriters(w []Writer) {
+	globalWriters = w
 }
 
 // Error logs at error level
-func (log *Logger) Error(format string, a ...interface{}) {
-	printLogMessage(log, ERROR, format, a)
+func (l *logger) Error(format string, a ...interface{}) {
+	PrintLog(l.name, l.level, ERROR, format, a)
 }
 
 // Info logs at info level
-func (log *Logger) Info(format string, a ...interface{}) {
-	printLogMessage(log, INFO, format, a)
+func (l *logger) Info(format string, a ...interface{}) {
+	PrintLog(l.name, l.level, INFO, format, a)
 }
 
 // Warn logs at wanr level
-func (log *Logger) Warn(format string, a ...interface{}) {
-	printLogMessage(log, WARN, format, a)
+func (l *logger) Warn(format string, a ...interface{}) {
+	PrintLog(l.name, l.level, WARN, format, a)
 }
 
 // Debug logs at debug level
-func (log *Logger) Debug(format string, a ...interface{}) {
-	printLogMessage(log, DEBUG, format, a)
+func (l *logger) Debug(format string, a ...interface{}) {
+	PrintLog(l.name, l.level, DEBUG, format, a)
 }
 
 // Panic error and exit
-func (log *Logger) Panic(format string, a ...interface{}) {
-	printLogMessage(log, ERROR, format, a)
+func (l *logger) Panic(format string, a ...interface{}) {
+	PrintLog(l.name, l.level, ERROR, format, a)
 	panic("panic!")
-
 }
 
-func printLogMessage(log *Logger, methodLevel Level, format string, a []interface{}) {
-	if log.level < methodLevel {
+// SetLevel set logger level
+func (l *logger) SetLevel(level Level) {
+	l.level = level
+}
+
+// PrintLog sends a log message to the writers.
+// name: logger name
+// loggerLevel: the level of the logger implementation
+// logLevel: the level of the message. If the level of the message is greater than loggerLevel the log will bi discarted
+// format: log format.  See fmt.Printf
+// a...: arguments.  See fmt.Printf
+func PrintLog(name string, loggerLevel, logLevel Level, format string, a []interface{}) {
+	if loggerLevel < logLevel {
 		return
 	}
-	log.writer.WriteLog(log.name, methodLevel, format, a)
+
+	for _, w := range globalWriters {
+		w.WriteLog(name, logLevel, format, a)
+	}
+}
+
+// Error log to root logger
+func Error(format string, a ...interface{}) {
+	globalLogger.Error(format, a)
+}
+
+// Info log to root logger
+func Info(format string, a ...interface{}) {
+	globalLogger.Info(format, a)
+}
+
+// Warn log to root logger
+func Warn(format string, a ...interface{}) {
+	globalLogger.Warn(format, a)
+}
+
+// Debug log to root logger
+func Debug(format string, a ...interface{}) {
+	globalLogger.Debug(format, a)
+}
+
+// Panic log to root logger
+func Panic(format string, a ...interface{}) {
+	globalLogger.Panic(format, a)
+}
+
+// resolves configuration
+func getDefaultLevel(def Level) Level {
+	str, ok := os.LookupEnv("LOG_LEVEL")
+	if !ok {
+		return def
+	}
+	l := strToLevel(str)
+	if l == OTHER {
+		return def
+	}
+	return l
+}
+
+// resolves configuration
+func getDefaultWriter() Writer {
+	return &WriterStdout{}
 }
