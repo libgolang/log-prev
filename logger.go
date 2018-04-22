@@ -5,10 +5,11 @@ import (
 )
 
 var (
-	globalLevels  = map[string]Level{"": getDefaultLevel(WARN)}
-	globalLoggers = map[string]Logger{}
-	globalWriters = []Writer{getDefaultWriter()}
-	globalLogger  = New("")
+	globalLevels       = map[string]Level{"": getDefaultLevel(WARN)}
+	globalLoggers      = map[string]Logger{}
+	globalWriters      = []Writer{getDefaultWriter()}
+	globalLogger       = New("")
+	globalTraceEnabled = false
 )
 
 // Logger interface exposed to users
@@ -50,6 +51,17 @@ func New(name string) Logger {
 // SetDefaultLevel sets the default logging level. It defaults to WARN
 func SetDefaultLevel(l Level) {
 	globalLevels[""] = l
+	globalLogger.SetLevel(l)
+}
+
+// SetTrace when set to true, the log will print file names and line numbers
+func SetTrace(trace bool) {
+	globalTraceEnabled = trace
+}
+
+// IsTraceEnabled whether printing of file names and line numbers is enabled
+func IsTraceEnabled() bool {
+	return globalTraceEnabled
 }
 
 // SetLoggerLevels sets the levels for all existing loggers and future loggers
@@ -116,7 +128,6 @@ func PrintLog(name string, loggerLevel, logLevel Level, format string, a []inter
 	if loggerLevel < logLevel {
 		return
 	}
-
 	for _, w := range globalWriters {
 		w.WriteLog(name, logLevel, format, a)
 	}
@@ -124,27 +135,27 @@ func PrintLog(name string, loggerLevel, logLevel Level, format string, a []inter
 
 // Error log to root logger
 func Error(format string, a ...interface{}) {
-	globalLogger.Error(format, a)
+	globalLogger.Error(format, a...)
 }
 
 // Info log to root logger
 func Info(format string, a ...interface{}) {
-	globalLogger.Info(format, a)
+	globalLogger.Info(format, a...)
 }
 
 // Warn log to root logger
 func Warn(format string, a ...interface{}) {
-	globalLogger.Warn(format, a)
+	globalLogger.Warn(format, a...)
 }
 
 // Debug log to root logger
 func Debug(format string, a ...interface{}) {
-	globalLogger.Debug(format, a)
+	globalLogger.Debug(format, a...)
 }
 
 // Panic log to root logger
 func Panic(format string, a ...interface{}) {
-	globalLogger.Panic(format, a)
+	globalLogger.Panic(format, a...)
 }
 
 // resolves configuration

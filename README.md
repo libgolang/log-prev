@@ -17,9 +17,9 @@
     )
     
     func main() {
-
+	
 	log.SetDefaultLevel(log.WARN)
-
+	
     	log.Debug("This is a debugging statement ... won't show")
     	log.Info("This is a debugging statement  ... won't show")
     	log.Warn("This is a debugging statement  ... will show")
