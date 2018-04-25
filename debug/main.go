@@ -1,19 +1,16 @@
 package main
 
 import (
-	"github.com/rhamerica/go-logger"
+	"github.com/rhamerica/go-log"
 )
 
 func main() {
-	log.DefaultLevel(WARN)
+	log.SetDefaultLevel(log.WARN)
 
-	log1 := log.NewLogger("myLogger")
-	log2 := log.NewLogger("OtherLogger")
+	log1 := log.New("myLogger")
+	log2 := log.New("OtherLogger")
 
-	log.Configuration(logger.Config{
-		DefaultLevel: logger.WARN,
-		Levels:       map[string]logger.Level{"myLogger": logger.DEBUG},
-	})
+	log.SetLoggerLevels(map[string]log.Level{"myLogger": log.DEBUG})
 
 	log1.Warn("This is a warning statement ... will show")
 	log1.Debug("This is a debugging statement ... will show")
