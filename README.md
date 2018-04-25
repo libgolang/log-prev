@@ -1,11 +1,13 @@
 # Go Logger
 
+[![GoDoc](https://godoc.org/github.com/libgolang/log?status.svg)](https://godoc.org/github.com/libgolang/log)
+[![Go Report Card](https://goreportcard.com/badge/github.com/libgolang/log)](https://goreportcard.com/report/github.com/libgolang/log)
 
 
 
 ## Download
 
-    go get -u github.com/rhamerica/go-log
+    go get -u github.com/libgolang/go-log
 
 
 ## Simple Usage
@@ -13,7 +15,7 @@
     package main
     
     import (
-    	"github.com/rhamerica/go-log"
+    	"github.com/libgolang/log"
     )
     
     func main() {
@@ -33,7 +35,7 @@
     package main
     
     import (
-    	"github.com/rhamerica/go-log"
+    	"github.com/libgolang/log"
     )
     
     func main() {
@@ -55,7 +57,7 @@
 ## Example
 
     import(
-        "github.com/rhamerica/go-log"
+        "github.com/libgolang/log"
     ) 
      
     func main() {
@@ -69,5 +71,4 @@
     }
 
 
-
-[![Go Report Card](https://goreportcard.com/badge/github.com/rhamerica/go-logger)](https://goreportcard.com/report/github.com/rhamerica/go-logger)
+		   

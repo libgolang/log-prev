@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/rhamerica/go-log"
+	"github.com/libgolang/log"
 )
 
 func main() {
