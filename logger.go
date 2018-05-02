@@ -1,7 +1,11 @@
 package log
 
 import (
+	"fmt"
 	"os"
+	"strings"
+
+	"github.com/magiconair/properties"
 )
 
 var (
@@ -45,6 +49,46 @@ func New(name string) Logger {
 
 	l := &logger{lvl, name}
 	globalLoggers[name] = l
+
+	//
+	if cfgFile, ok := os.LookupEnv("LOG_CONFIG"); ok {
+		props, err := properties.LoadFile(cfgFile, properties.UTF8)
+		if err == nil {
+			logLevels := make(map[string]Level)
+			for k, v := range props.Map() {
+				if strings.HasPrefix(k, "log.level.") || k == "log.level" {
+					logLevels[k] = strToLevel(v)
+				}
+			}
+			SetLoggerLevels(logLevels)
+
+			//
+			logWriters := make([]Writer, 0)
+			for k, v := range props.Map() {
+				if strings.HasPrefix(k, "log.writer.") {
+					parts := strings.Split(k, ".")
+					if len(parts) == 3 {
+						name := parts[2]
+						v = strings.ToLower(v)
+						if v == "stdout" {
+							logWriters = append(logWriters, &WriterStdout{})
+						} else if v == "file" {
+							size := props.GetInt64(fmt.Sprintf("log.writer.%s.maxSize", name), int64(Gigabyte))
+							maxfiles := props.GetInt(fmt.Sprintf("log.writer.%s.maxFiles", name), 10)
+							dir := props.GetString(fmt.Sprintf("log.writer.%s.logDir", name), "./log")
+							logName := props.GetString(fmt.Sprintf("log.writer.%s.name", name), "log")
+							logWriters = append(logWriters, NewFileWriter(dir, logName, FileSize(size), maxfiles))
+						}
+					}
+				}
+			}
+			if len(logWriters) > 0 {
+				SetWriters(logWriters)
+			}
+		}
+
+	}
+
 	return l
 }
 
