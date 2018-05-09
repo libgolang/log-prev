@@ -34,6 +34,7 @@ const (
 )
 
 type fileWriter struct {
+	level           Level
 	logDir          string
 	fileNamePattern string
 	file            *os.File
@@ -47,7 +48,7 @@ type fileWriter struct {
 // directory where logs will be written.  Parameter fileName is the name to use
 // when creating the files.  Param maxSize is the maximum size of a log, when the size
 // is exceded, the log is rotated.  maxNumFiles is the maximum number of logs to keep.
-func NewFileWriter(logDir, fileName string, maxSize FileSize, maxNumFiles int) Writer {
+func NewFileWriter(logDir, fileName string, maxSize FileSize, maxNumFiles int, level Level) Writer {
 	it := &fileWriter{}
 
 	it.logDir = logDir
@@ -55,6 +56,7 @@ func NewFileWriter(logDir, fileName string, maxSize FileSize, maxNumFiles int) W
 	it.maxSize = maxSize
 	it.numFiles = maxNumFiles
 	it.logQueue = make(chan *writeLogMsg, 100)
+	it.level = level
 
 	it.init()
 
@@ -75,7 +77,15 @@ func (fw *fileWriter) WriteLog(
 	format string,
 	args []interface{},
 ) {
+	if fw.level < mLevel {
+		return
+	}
 	fw.logQueue <- &writeLogMsg{name, mLevel, format, args}
+}
+
+func (fw *fileWriter) SetLevel(level Level) {
+	fw.level = level
+
 }
 
 func (fw *fileWriter) writeLog(m *writeLogMsg) {
