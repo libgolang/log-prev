@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	globalLoadedConfig = false
 	globalLevels       map[string]Level
 	globalLoggers      = map[string]Logger{}
 	globalWriters      = []Writer{getDefaultWriter()}
@@ -51,10 +52,9 @@ func New(name string) Logger {
 	l := &logger{lvl, name}
 	globalLoggers[name] = l
 
-	//
-	if cfgFile, ok := os.LookupEnv("LOG_CONFIG"); ok {
-		loadLogProperties(cfgFile)
-
+	if !globalLoadedConfig {
+		LoadLogProperties()
+		globalLoadedConfig = true
 	}
 
 	return l
@@ -188,7 +188,13 @@ func getDefaultWriter() Writer {
 	return &WriterStdout{WARN}
 }
 
-func loadLogProperties(cfgFile string) {
+// LoadLogProperties loads properties from configuration file in LOG_CONFIG
+func LoadLogProperties() {
+	cfgFile, ok := os.LookupEnv("LOG_CONFIG")
+	if !ok {
+		return
+	}
+
 	props, err := properties.LoadFile(cfgFile, properties.UTF8)
 	if err != nil {
 		return
