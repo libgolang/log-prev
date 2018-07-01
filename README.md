@@ -28,6 +28,46 @@
     	log.Error("This is a debugging statement ... will show")
     }
 
+## Configuration Environment Variables
+
+    // Path to configuration file
+    export LOG_CONFIG=/path/to/config.properties
+
+    // Override Global Debug Level
+    export LOG_LEVEL=DEBUG
+
+### Exampe config.properties
+
+    #
+    # Global Debug Level
+    # Default: WARN
+    log.level=DEBUG
+
+    #
+    # Enable Trace. This might be a slow operation
+    # Default: false
+    log.trace=true
+
+    #
+    # Set Debug Level for a logger named `xyzlogger`
+    #
+    log.level.xyzlogger=WARN
+
+    #
+    # Define a log writer. By default there is one writer to stdout
+    #
+    log.writer.logger0.type=stdout
+    
+    #
+    # Define a log writer to a file
+    #
+    log.writer.logger1.type=file
+    log.writer.logger1.name=one
+    log.writer.logger1.level=INFO
+    log.writer.logger1.maxfiles=10
+    log.writer.logger1.maxSize=1073741824
+    log.writer.logger1.dir=./log
+    
 
 ## Configuration
 
