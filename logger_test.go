@@ -97,3 +97,6 @@ func (tw *testWriter) WriteLog(name string, mlvl Level, format string, args []in
 	tw.loggerMsg = format
 	tw.loggerArgs = args
 }
+func (tw *testWriter) SetLevel(level Level) {
+	tw.loggerLevel = level
+}

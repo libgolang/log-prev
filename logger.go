@@ -10,8 +10,8 @@ import (
 
 var (
 	globalLoadedConfig = false
-	globalLevels       map[string]Level
-	globalLoggers      = map[string]Logger{}
+	globalLevels       = make(map[string]Level)
+	globalLoggers      = make(map[string]Logger)
 	globalWriters      = []Writer{getDefaultWriter()}
 	globalLogger       = New("")
 	globalTraceEnabled = false

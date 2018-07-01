@@ -2,7 +2,18 @@ package log
 
 import (
 	"encoding/json"
+	"github.com/fatih/color"
 	"strings"
+)
+
+var (
+	red    = color.New(color.FgRed).SprintfFunc()
+	yellow = color.New(color.FgYellow).SprintfFunc()
+	cyan   = color.New(color.FgCyan).SprintfFunc()
+	blue   = color.New(color.FgBlue).SprintfFunc()
+	//green  = color.New(color.FgGreen).SprintfFunc()
+	//magenta = color.New(color.FgMagenta).SprintfFunc()
+	//white   = color.New(color.FgWhite).SprintfFunc()
 )
 
 const (
@@ -27,6 +38,26 @@ type Level int
 
 func (l Level) String() string {
 	return levelToStr(l)
+}
+
+// StringColor terminal colored string
+func (l Level) StringColor() string {
+	var str string
+
+	switch l {
+	case DEBUG:
+		str = blue("DEBUG")
+	case INFO:
+		str = cyan("INFO")
+	case WARN:
+		str = yellow("WARN")
+	case ERROR:
+		str = red("ERROR")
+	default:
+		str = "OTHER"
+	}
+
+	return str
 }
 
 // MarshalJSON json serializer

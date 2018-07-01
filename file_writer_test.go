@@ -14,8 +14,15 @@ func TestFile(t *testing.T) {
 	dir, _ := ioutil.TempDir("", "test")
 	defer func() { _ = os.RemoveAll(dir) }()
 
-	fw := NewFileWriter(dir, "test", Megabyte*1, 2)
+	fw := NewFileWriter(dir, "test", Megabyte*1, 2, DEBUG)
 	fw.WriteLog("log-name", WARN, "Arg1: %s", []interface{}{"arg1"})
+
+	// wait
+	if lfw, ok := fw.(*fileWriter); ok {
+		for len(lfw.logQueue) > 0 {
+			time.Sleep(50 * time.Millisecond)
+		}
+	}
 
 	bytes, err := ioutil.ReadFile(path.Join(dir, "test-0.log"))
 	if err != nil {
@@ -23,7 +30,7 @@ func TestFile(t *testing.T) {
 	} else {
 		contents := string(bytes)
 		if !strings.Contains(contents, "Arg1: arg1") {
-			t.Error("Failed to write to file")
+			t.Errorf("Failed to write to file: expected 'Arg1: arg1', but got '%s'", contents)
 		}
 	}
 }
@@ -32,7 +39,7 @@ func TestRotation(t *testing.T) {
 	dir, _ := ioutil.TempDir("", "test")
 	defer func() { _ = os.RemoveAll(dir) }()
 
-	fw := NewFileWriter(dir, "test", Kilobyte*1, 5)
+	fw := NewFileWriter(dir, "test", Kilobyte*1, 5, DEBUG)
 
 	msg := "##################### %d"
 	for i := 0; i < 100; i++ {

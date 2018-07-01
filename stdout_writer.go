@@ -22,14 +22,18 @@ func (w *WriterStdout) WriteLog(
 		return
 	}
 
-	var preFormat string
+	var preFormatStr string
+	var preFormatArgs []interface{}
 	if IsTraceEnabled() {
 		_, file, line, _ := runtime.Caller(4)
-		preFormat = fmt.Sprintf("%s %s [%s] %s:%d %s\n", time.Now().Format(time.RFC3339), mLevel, name, file, line, format)
+		preFormatStr = "%s %s [%s] %s:%d %s\n"
+		preFormatArgs = []interface{}{time.Now().Format(time.RFC3339), mLevel.StringColor(), name, file, line, format}
 	} else {
-		preFormat = fmt.Sprintf("%s %s [%s] %s\n", time.Now().Format(time.RFC3339), mLevel, name, format)
+		preFormatStr = "%s %s [%s] %s\n"
+		preFormatArgs = []interface{}{time.Now().Format(time.RFC3339), mLevel.StringColor(), name, format}
 	}
 
+	preFormat := fmt.Sprintf(preFormatStr, preFormatArgs...)
 	fmt.Printf(preFormat, args...)
 }
 
@@ -37,12 +41,3 @@ func (w *WriterStdout) WriteLog(
 func (w *WriterStdout) SetLevel(level Level) {
 	w.level = level
 }
-
-/*
-type writerChannelMsg struct {
-	name   string
-	mLevel Level
-	format string
-	args   []interface{}
-}
-*/
