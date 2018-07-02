@@ -37,7 +37,7 @@ const (
 type Level int
 
 func (l Level) String() string {
-	return levelToStr(l)
+	return LevelToStr(l)
 }
 
 // StringColor terminal colored string
@@ -62,18 +62,19 @@ func (l Level) StringColor() string {
 
 // MarshalJSON json serializer
 func (l *Level) MarshalJSON() ([]byte, error) {
-	return json.Marshal(levelToStr(*l))
+	return json.Marshal(LevelToStr(*l))
 }
 
 // UnmarshalJSON json unserializer
 func (l *Level) UnmarshalJSON(b []byte) error {
 	var str string
 	err := json.Unmarshal(b, &str)
-	*l = strToLevel(str)
+	*l = StrToLevel(str)
 	return err
 }
 
-func strToLevel(str string) Level {
+// StrToLevel converts a string to a Level type
+func StrToLevel(str string) Level {
 	str = strings.ToUpper(str)
 	var level Level
 	switch str {
@@ -91,7 +92,8 @@ func strToLevel(str string) Level {
 	return level
 }
 
-func levelToStr(level Level) string {
+// LevelToStr Level type to a string
+func LevelToStr(level Level) string {
 	var str string
 
 	switch level {
