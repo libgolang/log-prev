@@ -64,7 +64,6 @@ func NewFileWriter(logDir, fileName string, maxSize FileSize, maxNumFiles int, l
 }
 
 type writeLogMsg struct {
-	name   string
 	mLevel Level
 	format string
 	args   []interface{}
@@ -72,7 +71,6 @@ type writeLogMsg struct {
 
 // WriteLog implementation of logger.Writer
 func (fw *fileWriter) WriteLog(
-	name string,
 	mLevel Level,
 	format string,
 	args []interface{},
@@ -80,7 +78,7 @@ func (fw *fileWriter) WriteLog(
 	if fw.level < mLevel {
 		return
 	}
-	fw.logQueue <- &writeLogMsg{name, mLevel, format, args}
+	fw.logQueue <- &writeLogMsg{mLevel, format, args}
 }
 
 func (fw *fileWriter) SetLevel(level Level) {
@@ -92,9 +90,9 @@ func (fw *fileWriter) writeLog(m *writeLogMsg) {
 	var preFormat string
 	if IsTraceEnabled() {
 		_, file, line, _ := runtime.Caller(4)
-		preFormat = fmt.Sprintf("%s %s [%s] %s:%d %s\n", time.Now().Format(time.RFC3339), m.mLevel, m.name, file, line, m.format)
+		preFormat = fmt.Sprintf("%s %s %s:%d %s\n", time.Now().Format(time.RFC3339), m.mLevel, file, line, m.format)
 	} else {
-		preFormat = fmt.Sprintf("%s %s [%s] %s\n", time.Now().Format(time.RFC3339), m.mLevel, m.name, m.format)
+		preFormat = fmt.Sprintf("%s %s %s\n", time.Now().Format(time.RFC3339), m.mLevel, m.format)
 	}
 
 	str := fmt.Sprintf(preFormat, m.args...)

@@ -9,62 +9,14 @@ import (
 )
 
 var (
-	globalLoadedConfig = false
-	globalLevels       = make(map[string]Level)
-	globalLoggers      = make(map[string]Logger)
 	globalWriters      = []Writer{getDefaultWriter()}
-	globalLogger       = New("")
 	globalTraceEnabled = false
 )
 
-// Logger interface exposed to users
-type Logger interface {
-	Err(format string, args ...interface{}) error
-	Error(format string, args ...interface{})
-	Warn(format string, args ...interface{})
-	Info(format string, args ...interface{})
-	Debug(format string, args ...interface{})
-	Panic(format string, args ...interface{})
-	SetLevel(Level)
-}
-
 // Writer writer interface
 type Writer interface {
-	WriteLog(name string, logLevel Level, format string, args []interface{})
+	WriteLog(logLevel Level, format string, args []interface{})
 	SetLevel(level Level)
-}
-
-// logger instance
-type logger struct {
-	level Level
-	name  string
-}
-
-// New constructor
-func New(name string) Logger {
-	// level
-	var lvl Level
-	if l, ok := globalLevels[name]; ok {
-		lvl = l
-	} else {
-		lvl = globalLevels[""]
-	}
-
-	l := &logger{lvl, name}
-	globalLoggers[name] = l
-
-	if !globalLoadedConfig {
-		LoadLogProperties()
-		globalLoadedConfig = true
-	}
-
-	return l
-}
-
-// SetDefaultLevel sets the default logging level. It defaults to WARN
-func SetDefaultLevel(l Level) {
-	globalLevels[""] = l
-	globalLogger.SetLevel(l)
 }
 
 // SetTrace when set to true, the log will print file names and line numbers
@@ -77,64 +29,9 @@ func IsTraceEnabled() bool {
 	return globalTraceEnabled
 }
 
-// SetLoggerLevels sets the levels for all existing loggers and future loggers
-func SetLoggerLevels(levels map[string]Level) {
-	//
-	for k, lev := range levels {
-		if log, ok := globalLoggers[k]; ok {
-			log.SetLevel(lev)
-		}
-	}
-
-	// make sure there is always a root logger level
-	if _, ok := levels[""]; !ok {
-		levels[""] = WARN
-	}
-
-	//
-	globalLevels = levels
-}
-
 // SetWriters sets the writers for all the loggers
 func SetWriters(w []Writer) {
 	globalWriters = w
-}
-
-// Err logs at error level and returns the error
-func (l *logger) Err(format string, a ...interface{}) error {
-	PrintLog(l.name, l.level, ERROR, format, a)
-	return fmt.Errorf(format, a...)
-}
-
-// Error logs at error level
-func (l *logger) Error(format string, a ...interface{}) {
-	PrintLog(l.name, l.level, ERROR, format, a)
-}
-
-// Info logs at info level
-func (l *logger) Info(format string, a ...interface{}) {
-	PrintLog(l.name, l.level, INFO, format, a)
-}
-
-// Warn logs at wanr level
-func (l *logger) Warn(format string, a ...interface{}) {
-	PrintLog(l.name, l.level, WARN, format, a)
-}
-
-// Debug logs at debug level
-func (l *logger) Debug(format string, a ...interface{}) {
-	PrintLog(l.name, l.level, DEBUG, format, a)
-}
-
-// Panic error and exit
-func (l *logger) Panic(format string, a ...interface{}) {
-	PrintLog(l.name, l.level, ERROR, format, a)
-	panic("panic!")
-}
-
-// SetLevel set logger level
-func (l *logger) SetLevel(level Level) {
-	l.level = level
 }
 
 // PrintLog sends a log message to the writers.
@@ -143,43 +40,42 @@ func (l *logger) SetLevel(level Level) {
 // logLevel: the level of the message. If the level of the message is greater than loggerLevel the log will bi discarted
 // format: log format.  See fmt.Printf
 // a...: arguments.  See fmt.Printf
-func PrintLog(name string, loggerLevel, logLevel Level, format string, a []interface{}) {
-	if loggerLevel < logLevel {
-		return
-	}
+func PrintLog(logLevel Level, format string, a []interface{}) {
 	for _, w := range globalWriters {
-		w.WriteLog(name, logLevel, format, a)
+		w.WriteLog(logLevel, format, a)
 	}
 }
 
 // Err log to root logger
 func Err(format string, a ...interface{}) error {
-	return globalLogger.Err(format, a...)
+	PrintLog(ERROR, format, a)
+	return fmt.Errorf(format, a...)
 }
 
 // Error log to root logger
 func Error(format string, a ...interface{}) {
-	globalLogger.Error(format, a...)
+	PrintLog(ERROR, format, a)
 }
 
 // Info log to root logger
 func Info(format string, a ...interface{}) {
-	globalLogger.Info(format, a...)
+	PrintLog(INFO, format, a)
 }
 
 // Warn log to root logger
 func Warn(format string, a ...interface{}) {
-	globalLogger.Warn(format, a...)
+	PrintLog(WARN, format, a)
 }
 
 // Debug log to root logger
 func Debug(format string, a ...interface{}) {
-	globalLogger.Debug(format, a...)
+	PrintLog(DEBUG, format, a)
 }
 
 // Panic log to root logger
 func Panic(format string, a ...interface{}) {
-	globalLogger.Panic(format, a...)
+	PrintLog(ERROR, format, a)
+	panic(fmt.Errorf(format, a...))
 }
 
 // resolves configuration
@@ -220,24 +116,6 @@ func LoadLogProperties() {
 	}
 
 	//
-	// Levels
-	//
-	logLevels := make(map[string]Level)
-	logLevels[""] = StrToLevel(props.GetString("log.level", ""))
-	for k, v := range props.Map() {
-		if !strings.HasPrefix(k, "log.level.") {
-			continue
-		}
-
-		parts := strings.Split(k, ".")
-		if len(parts) != 3 {
-			continue
-		}
-		loggerName := parts[2] //log.level.name1=stdout|file
-		logLevels[loggerName] = StrToLevel(v)
-	}
-
-	//
 	// Writers
 	//
 	logWriters := make([]Writer, 0)
@@ -274,7 +152,6 @@ func LoadLogProperties() {
 		}
 	}
 
-	SetLoggerLevels(logLevels)
 	if len(logWriters) > 0 {
 		SetWriters(logWriters)
 	}
