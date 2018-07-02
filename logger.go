@@ -188,7 +188,7 @@ func getDefaultLevel(def Level) Level {
 	if !ok {
 		return def
 	}
-	l := strToLevel(str)
+	l := StrToLevel(str)
 	if l == OTHER {
 		return def
 	}
@@ -223,7 +223,7 @@ func LoadLogProperties() {
 	// Levels
 	//
 	logLevels := make(map[string]Level)
-	logLevels[""] = strToLevel(props.GetString("log.level", ""))
+	logLevels[""] = StrToLevel(props.GetString("log.level", ""))
 	for k, v := range props.Map() {
 		if !strings.HasPrefix(k, "log.level.") {
 			continue
@@ -234,7 +234,7 @@ func LoadLogProperties() {
 			continue
 		}
 		loggerName := parts[2] //log.level.name1=stdout|file
-		logLevels[loggerName] = strToLevel(v)
+		logLevels[loggerName] = StrToLevel(v)
 	}
 
 	//
@@ -257,7 +257,7 @@ func LoadLogProperties() {
 
 			var writer Writer
 			loggerType := props.GetString(fmt.Sprintf("log.writer.%s.type", loggerName), "stdout")
-			loggerLevel := strToLevel(props.GetString(fmt.Sprintf("log.writer.%s.level", loggerName), "DEBUG"))
+			loggerLevel := StrToLevel(props.GetString(fmt.Sprintf("log.writer.%s.level", loggerName), "DEBUG"))
 			if loggerType == "stdout" {
 				writer = &WriterStdout{level: loggerLevel}
 			} else if loggerType == "file" {
