@@ -3,7 +3,9 @@ package log
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
+	"time"
 
 	"github.com/magiconair/properties"
 )
@@ -155,4 +157,28 @@ func LoadLogProperties() {
 	if len(logWriters) > 0 {
 		SetWriters(logWriters)
 	}
+}
+
+func preformat(
+	writerLevel Level,
+	messageLevel Level,
+	format string,
+	do func(preFormat string),
+) {
+	if writerLevel < messageLevel {
+		return
+	}
+
+	var preFormatStr string
+	var preFormatArgs []interface{}
+	if IsTraceEnabled() {
+		_, file, line, _ := runtime.Caller(4)
+		preFormatStr = "%s %s %s:%d %s\n"
+		preFormatArgs = []interface{}{time.Now().Format(time.RFC3339), messageLevel.StringColor(), file, line, format}
+	} else {
+		preFormatStr = "%s %s %s\n"
+		preFormatArgs = []interface{}{time.Now().Format(time.RFC3339), messageLevel.StringColor(), format}
+	}
+
+	do(fmt.Sprintf(preFormatStr, preFormatArgs...))
 }

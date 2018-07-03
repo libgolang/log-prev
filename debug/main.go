@@ -13,6 +13,7 @@ func main() {
 		w.SetLevel(log.DEBUG)
 		log.SetWriters([]log.Writer{w})
 	*/
+	log.SetTrace(true)
 	os.Setenv("LOG_CONFIG", "./config.properties")
 
 	log.Debug("Debug")
