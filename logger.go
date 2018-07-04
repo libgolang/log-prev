@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	globalWriters      = []Writer{getDefaultWriter()}
+	defaultWriter      = getDefaultWriter()
+	globalWriters      = []Writer{defaultWriter}
 	globalTraceEnabled = false
 )
 
@@ -81,21 +82,13 @@ func Panic(format string, a ...interface{}) {
 }
 
 // resolves configuration
-func getDefaultLevel(def Level) Level {
-	str, ok := os.LookupEnv("LOG_LEVEL")
-	if !ok {
-		return def
-	}
-	l := StrToLevel(str)
-	if l == OTHER {
-		return def
-	}
-	return l
-}
-
-// resolves configuration
 func getDefaultWriter() Writer {
 	return &WriterStdout{WARN}
+}
+
+// GetDefaultWriter gets the default writer
+func GetDefaultWriter() Writer {
+	return defaultWriter
 }
 
 // LoadLogProperties loads properties from configuration file in LOG_CONFIG
