@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"time"
 
 	"github.com/libgolang/log"
@@ -13,8 +12,8 @@ func main() {
 		w.SetLevel(log.DEBUG)
 		log.SetWriters([]log.Writer{w})
 	*/
+	log.GetDefaultWriter().SetLevel(log.DEBUG)
 	log.SetTrace(true)
-	os.Setenv("LOG_CONFIG", "./config.properties")
 
 	log.Debug("Debug")
 	log.Info("Info")

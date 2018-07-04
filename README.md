@@ -7,7 +7,7 @@
 
 ## Download
 
-    go get -u github.com/libgolang/go-log
+    go get -u github.com/libgolang/log
 
 
 ## Simple Usage
@@ -20,8 +20,12 @@
     
     func main() {
 	
-	log.SetDefaultLevel(log.WARN)
-	
+	// debug level
+	log.GetDefaultWriter().SetLevel(log.WARN)
+
+	// sets trace
+	log.SetTrace(true)
+
     	log.Debug("This is a debugging statement ... won't show")
     	log.Info("This is a debugging statement  ... won't show")
     	log.Warn("This is a debugging statement  ... will show")
@@ -49,11 +53,6 @@
     log.trace=true
 
     #
-    # Set Debug Level for a logger named `xyzlogger`
-    #
-    log.level.xyzlogger=WARN
-
-    #
     # Define a log writer. By default there is one writer to stdout
     #
     log.writer.logger0.type=stdout
@@ -67,48 +66,4 @@
     log.writer.logger1.maxfiles=10
     log.writer.logger1.maxSize=1073741824
     log.writer.logger1.dir=./log
-    
 
-## Configuration
-
-
-    package main
-    
-    import (
-    	"github.com/libgolang/log"
-    )
-    
-    func main() {
-    
-    	log1 := log.New("myLogger")
-    	log2 := log.New("OtherLogger")
-    
-    	log.SetLoggerLevels(map[string]Level{"myLogger": log.DEBUG})
-    
-    	log1.Warn("This is a warning statement ... will show")
-    	log1.Debug("This is a debugging statement ... will show")
-    
-    	log2.Warn("This is a warning statement ... will show")
-    	log2.Debug("This is a debugging statement ... won't show")
-    }
-
-
-
-## Example
-
-    import(
-        "github.com/libgolang/log"
-    ) 
-     
-    func main() {
-        l := log.New("main")
-
-        l.Debug("Debug Message")
-        l.Info("Info Message")
-        l.Warn("Warn Message")
-        l.Error("Error Message" )
-        l.Panic("Panic Message") // calls panic()
-    }
-
-
-		   
