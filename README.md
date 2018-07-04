@@ -2,6 +2,10 @@
 
 [![GoDoc](https://godoc.org/github.com/libgolang/log?status.svg)](https://godoc.org/github.com/libgolang/log)
 [![Go Report Card](https://goreportcard.com/badge/github.com/libgolang/log)](https://goreportcard.com/report/github.com/libgolang/log)
+[![License](https://img.shields.io/github/license/libgolang/log.svg)](LICENSE)
+[![Release](https://img.shields.io/github/release/libgolang/log.svg)](https://github.com/libgolang/log/releases)
+
+
 
 
 
